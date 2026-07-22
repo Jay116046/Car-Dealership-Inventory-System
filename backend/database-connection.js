@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 
+dotenv.config();
 
 const connect_db = () => {
-    // const url = process.env.MONGODB_URL ;
-    const url = "mongodb+srv://jayjethva116046_db_user:9HWiqdfXgnQj6XEQ@cluster0.vwdqfgk.mongodb.net/?appName=Cluster0" ;
-
+    const url = process.env.MONGODB_URL ;
 
     mongoose.connect(url).then(() =>
         console.log("___connected___")).catch((err)=>{
