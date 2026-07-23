@@ -17,7 +17,8 @@ export const register =async (req,res)=>{
         const newUser = new User({
             userName,
             email,
-            password:hashPassword
+            password:hashPassword,
+            roll: 'user'
         })
 
         await newUser.save();
@@ -127,6 +128,17 @@ export const authmiddleware = (req,res,next)=>{
         })
     }
 
+}
+
+export const adminOnly = (req,res,next)=>{
+    if(req.user?.roll !== 'admin'){
+        return res.status(403).json({
+            success:false,
+            message:"admin access required"
+        })
+    }
+
+    return next();
 }
 
 

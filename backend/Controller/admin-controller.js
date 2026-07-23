@@ -184,7 +184,7 @@ export const reStock = async (req, res) => {
             return res.status(400).json({ error: 'Must provide a valid positive amount to restock' });
         }
 
-        const vehicle = await Vehicle.findById(vehicleId);
+        const vehicle = await Vehicle.findById(id);
 
         if (!vehicle) {
             return res.status(404).json({ error: 'Vehicle not found' });
@@ -194,6 +194,7 @@ export const reStock = async (req, res) => {
         await vehicle.save();
 
         return res.status(200).json({
+            success: true,
             message: 'Vehicle restocked successfully',
             vehicle
         });
