@@ -2,7 +2,8 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 import { clearAuthSession } from './authSlice.js'
 
-const API_URL = 'http://localhost:3000'
+// const API_URL = 'http://localhost:3000'
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 const initialState = {
   list: [],
