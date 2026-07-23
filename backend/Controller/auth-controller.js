@@ -48,7 +48,7 @@ export const login =async (req,res)=>{
         const checkUser = await User.findOne({email}) ;
 
         if(!checkUser){
-            res.json({
+            return res.status(404).json({
                 success:false,
                 message:"please register this email first"
             })
@@ -57,7 +57,7 @@ export const login =async (req,res)=>{
         const checkPassword = await bcryptjs.compare(password,checkUser.password)
 
         if(!checkPassword){
-            res.json({
+            return res.status(401).json({
                 success:false,
                 message:"please enter valid email or password"
             })
@@ -109,9 +109,8 @@ export const logout = (req,res)=>{
 export const authmiddleware = (req,res,next)=>{
     const token = req.cookies.token;
     
-    // console.log(token);
     if(!token){        
-        res.status(401).json({
+        return res.status(401).json({
             success:false,
             message:"unauthorized user"
         })
@@ -120,9 +119,9 @@ export const authmiddleware = (req,res,next)=>{
     try{
         const decoded = jsonwebtoken.verify(token,'CLIENT_SECRET_KEY');
         req.user = decoded;
-        next();
+        return next();
     }catch(e){
-        res.status(401).json({
+        return res.status(401).json({
             success:false,
             message:"unauthorized user"
         })

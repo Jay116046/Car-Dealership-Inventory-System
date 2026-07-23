@@ -1,7 +1,5 @@
-import Vehicle from "../Model/Vehicles.js";
 import { imageUploadUtil } from '../helpers/cloudinary.js'
-
-
+import Vehicle from "../Model/Vehicles.js"
 
 export const handleImageUpload = async (req, res) => {
     // console.log(req.file.buffer);
@@ -26,7 +24,7 @@ export const handleImageUpload = async (req, res) => {
         })
 
     } catch (err) {
-        console.log(err);
+        // console.log(err);
 
         res.json({
             success: false,
@@ -66,7 +64,7 @@ export const addvehicle = async (req, res) => {
         })
 
     } catch (err) {
-        console.log(err);
+        // console.log(err);
 
         res.status(500).json({
             success: false,
@@ -89,7 +87,7 @@ export const getvehicles = async (req, res) => {
         })
 
     } catch (err) {
-        console.log(err);
+        // console.log(err);
 
         res.status(500).json({
             success: false,
@@ -102,7 +100,6 @@ export const getvehicles = async (req, res) => {
 export const updatevehicle = async (req, res) => {
     try {
         const { id } = req.params;
-        // console.log(id,req.params,"object id is this");
 
         const {
             image,
@@ -113,24 +110,24 @@ export const updatevehicle = async (req, res) => {
             quantity } = req.body;
 
         const findvehicle = await Vehicle.findById(id);
-        // console.log(findvehicle);
-
 
         if (!findvehicle) {
-            res.status(404).json({
-                success: true,
+            return res.status(404).json({
+                success: false,
                 messege: "vehicle not found"
             })
         }
 
-        findvehicle.make = make || findvehicle.make
-        findvehicle.model = model || findvehicle.model
-        findvehicle.category = category || findvehicle.category
-        findvehicle.price = price === '' ? 0 : price || findvehicle.price
+        findvehicle.image = image || findvehicle.image;
+        findvehicle.make = make || findvehicle.make;
+        findvehicle.model = model || findvehicle.model;
+        findvehicle.category = category || findvehicle.category;
+        findvehicle.price = Number(price) || findvehicle.price;
+        findvehicle.quantity = Number(quantity) || findvehicle.quantity;
 
-        findvehicle.save();
+        await findvehicle.save();
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             messege: "vehicle successfully update",
             findvehicle
@@ -139,7 +136,7 @@ export const updatevehicle = async (req, res) => {
     } catch (err) {
         console.log(err);
 
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             messege: "error"
         })
@@ -173,5 +170,35 @@ export const deletevehicle = async (req, res) => {
             success: false,
             messege: "error"
         })
+    }
+}
+
+// restock vehicle
+
+export const reStock = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { amount } = req.body;
+
+        if (!amount || typeof amount !== 'number' || amount <= 0) {
+            return res.status(400).json({ error: 'Must provide a valid positive amount to restock' });
+        }
+
+        const vehicle = await Vehicle.findById(vehicleId);
+
+        if (!vehicle) {
+            return res.status(404).json({ error: 'Vehicle not found' });
+        }
+
+        vehicle.quantity += amount;
+        await vehicle.save();
+
+        return res.status(200).json({
+            message: 'Vehicle restocked successfully',
+            vehicle
+        });
+
+    } catch (error) {
+        return res.status(500).json({ error: 'Server error processing restock' });
     }
 }

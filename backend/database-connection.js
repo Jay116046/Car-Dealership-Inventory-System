@@ -8,7 +8,7 @@ const connect_db = () => {
 
     mongoose.connect(url).then(() =>
         console.log("___connected___")).catch((err)=>{
-            console.log("error",err);
+            // console.log("error",err);
         })
 }
 
