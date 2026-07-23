@@ -18,6 +18,21 @@ const initialState = {
   error: null,
 }
 
+export const checkAuth = createAsyncThunk(
+  'auth/checkAuth',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/auth/authcheck`, {
+        withCredentials: true,
+      })
+
+      return response.data.user
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Unauthorized')
+    }
+  }
+)
+
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (payload, { rejectWithValue }) => {
@@ -63,9 +78,31 @@ const authSlice = createSlice({
     clearAuthError(state) {
       state.error = null
     },
+    clearAuthSession(state) {
+      state.user = null
+      state.status = 'idle'
+      state.error = null
+      localStorage.removeItem('carInventoryUser')
+    },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(checkAuth.pending, (state) => {
+        state.status = 'loading'
+        state.error = null
+      })
+      .addCase(checkAuth.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+        state.user = action.payload
+        state.error = null
+        localStorage.setItem('carInventoryUser', JSON.stringify(action.payload))
+      })
+      .addCase(checkAuth.rejected, (state, action) => {
+        state.status = 'failed'
+        state.user = null
+        state.error = action.payload
+        localStorage.removeItem('carInventoryUser')
+      })
       .addCase(registerUser.pending, (state) => {
         state.status = 'loading'
         state.error = null
@@ -98,5 +135,5 @@ const authSlice = createSlice({
   },
 })
 
-export const { clearAuthError } = authSlice.actions
+export const { clearAuthError, clearAuthSession } = authSlice.actions
 export default authSlice.reducer

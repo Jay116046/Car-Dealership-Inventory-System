@@ -6,13 +6,14 @@ import LoginPage from './pages/LoginPage.jsx'
 import HomePage from './pages/HomePage.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import { fetchVehicles } from './store/vehicleSlice.js'
-import { logoutUser } from './store/authSlice.js'
+import { checkAuth, logoutUser } from './store/authSlice.js'
 
 function App() {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
 
   useEffect(() => {
+    dispatch(checkAuth())
     dispatch(fetchVehicles())
   }, [dispatch])
 

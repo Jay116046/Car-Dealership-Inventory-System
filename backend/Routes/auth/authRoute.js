@@ -1,8 +1,7 @@
 import express from "express"
-import {register,login,logout} from '../../Controller/auth-controller.js'
+import {register,login,logout, authmiddleware} from '../../Controller/auth-controller.js'
 
 const authRoute = express.Router();
-
 
 authRoute.get('/authcheck',authmiddleware,(req,res)=>{
     const user = req.user;

@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
+import { clearAuthSession } from './authSlice.js'
 
 const API_URL = 'http://localhost:3000'
 
@@ -35,6 +36,9 @@ export const purchaseVehicle = createAsyncThunk(
       await dispatch(fetchVehicles())
       return response.data
     } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        dispatch(clearAuthSession())
+      }
       return rejectWithValue(error.response?.data?.error || 'Purchase failed')
     }
   }
@@ -50,6 +54,9 @@ export const addVehicle = createAsyncThunk(
       await dispatch(fetchVehicles())
       return response.data
     } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        dispatch(clearAuthSession())
+      }
       return rejectWithValue(error.response?.data?.messege || 'Unable to add vehicle')
     }
   }
@@ -65,6 +72,9 @@ export const updateVehicle = createAsyncThunk(
       await dispatch(fetchVehicles())
       return response.data
     } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        dispatch(clearAuthSession())
+      }
       return rejectWithValue(error.response?.data?.messege || 'Unable to update vehicle')
     }
   }
@@ -80,6 +90,9 @@ export const deleteVehicle = createAsyncThunk(
       await dispatch(fetchVehicles())
       return response.data
     } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        dispatch(clearAuthSession())
+      }
       return rejectWithValue(error.response?.data?.messege || 'Unable to delete vehicle')
     }
   }
@@ -97,6 +110,9 @@ export const restockVehicle = createAsyncThunk(
       await dispatch(fetchVehicles())
       return response.data
     } catch (error) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        dispatch(clearAuthSession())
+      }
       return rejectWithValue(error.response?.data?.error || 'Unable to restock vehicle')
     }
   }
