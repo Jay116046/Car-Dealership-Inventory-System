@@ -2,92 +2,92 @@ import bcryptjs from 'bcryptjs'
 import jsonwebtoken from 'jsonwebtoken'
 import User from '../Model/User.js';
 
-export const register =async (req,res)=>{
+export const register = async (req, res) => {
 
-    const {userName,email,password}=req.body;
+    const { userName, email, password } = req.body;
+    try {
 
-    try{
-
-        const checkUser = await User.findOne({email})
-        if(checkUser){
-            return res.json({seccess:false,messege:'User already exist with same email! please enter unique email'})
+        const checkUser = await User.findOne({ email })
+        if (checkUser) {
+            return res.json({ seccess: false, messege: 'User already exist with same email! please enter unique email' })
         }
 
-        const hashPassword = await bcryptjs.hash(password,12);
+        const hashPassword = await bcryptjs.hash(password, 12);
         const newUser = new User({
             userName,
             email,
-            password:hashPassword,
+            password: hashPassword,
             roll: 'user'
         })
 
         await newUser.save();
 
         res.status(200).json({
-            success:true,
-            message:"register successfully"
+            success: true,
+            message: "register successfully"
         })
 
-    }catch(e){
-      console.log(e);
-      
+    } catch (e) {
+        console.log(e);
+
         res.status(500).json({
-            success:false,
-            message:"some error"
+            success: false,
+            message: "some error"
         })
     }
 }
 
 // login
 
-export const login =async (req,res)=>{
+export const login = async (req, res) => {
 
-    const {email,password}=req.body;
+    const { email, password } = req.body;
 
-    try{
+    try {
 
-        const checkUser = await User.findOne({email}) ;
+        const checkUser = await User.findOne({ email });
 
-        if(!checkUser){
+        if (!checkUser) {
             return res.status(404).json({
-                success:false,
-                message:"please register this email first"
+                success: false,
+                message: "please register this email first"
             })
         }
 
-        const checkPassword = await bcryptjs.compare(password,checkUser.password)
+        const checkPassword = await bcryptjs.compare(password, checkUser.password)
 
-        if(!checkPassword){
+        if (!checkPassword) {
             return res.status(401).json({
-                success:false,
-                message:"please enter valid email or password"
+                success: false,
+                message: "please enter valid email or password"
             })
         }
 
         const token = jsonwebtoken.sign({
-            id:checkUser._id,
-            roll:checkUser.roll,
-            email:checkUser.email,
-            userName:checkUser.userName
-        },'CLIENT_SECRET_KEY',{expiresIn:'60m'})
+            id: checkUser._id,
+            role: checkUser.roll,
+            email: checkUser.email,
+            userName: checkUser.userName
+        }, 'CLIENT_SECRET_KEY', { expiresIn: '60m' })
 
 
-        res.cookie('token',token,{httpOnly:true,secure:false}).json({
-            success:true,
-            message:'successfully logged-in',
-            user:{
-                email:checkUser.email,
-                id:checkUser._id,
-                roll:checkUser.roll,
-                userName:checkUser.userName
+        res.cookie('token', token, { httpOnly: true, secure: false }).json({
+            success: true,
+            message: 'successfully logged-in',
+            token: token,
+            user: {
+                email: checkUser.email,
+                id: checkUser._id,
+                role: checkUser.roll,
+                userName: checkUser.userName
             }
         })
 
 
-    }catch(e){
+    } catch (e) {
         res.status(500).json({
-            success:false,
-            message:"some error"
+            success: false,
+            message: "some error"
         })
     }
 }
@@ -97,44 +97,46 @@ export const login =async (req,res)=>{
 
 //logout
 
-export const logout = (req,res)=>{
+export const logout = (req, res) => {
     res.clearCookie('token').json({
-        success:true,
-        message:"logout successfully"
+        success: true,
+        message: "logout successfully"
     });
 };
 
 
 // authcheck
 
-export const authmiddleware = (req,res,next)=>{
-    const token = req.cookies.token;
-    
-    if(!token){        
+export const authmiddleware = (req, res, next) => {
+    const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+    // console.log(token);
+
+
+    if (!token) {
         return res.status(401).json({
-            success:false,
-            message:"unauthorized user"
+            success: false,
+            message: "unauthorized user"
         })
     }
 
-    try{
-        const decoded = jsonwebtoken.verify(token,'CLIENT_SECRET_KEY');
+    try {
+        const decoded = jsonwebtoken.verify(token, 'CLIENT_SECRET_KEY');
         req.user = decoded;
         return next();
-    }catch(e){
+    } catch (e) {
         return res.status(401).json({
-            success:false,
-            message:"unauthorized user"
+            success: false,
+            message: "unauthorized user"
         })
     }
 
 }
 
-export const adminOnly = (req,res,next)=>{
-    if(req.user?.roll !== 'admin'){
+export const adminOnly = (req, res, next) => {
+    if (req.user?.role !== 'admin') {
         return res.status(403).json({
-            success:false,
-            message:"admin access required"
+            success: false,
+            message: "admin access required"
         })
     }
 

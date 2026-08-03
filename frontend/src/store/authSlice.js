@@ -1,139 +1,153 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import axios from 'axios'
-
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import api from '../api/axios';
 
 const readStoredUser = () => {
   try {
-    const storedValue = localStorage.getItem('carInventoryUser')
-    return storedValue ? JSON.parse(storedValue) : null
+    const storedValue = localStorage.getItem('carInventoryUser');
+    return storedValue ? JSON.parse(storedValue) : null;
   } catch {
-    return null
+    return null;
   }
-}
+};
 
 const initialState = {
   user: readStoredUser(),
+  role: readStoredUser()?.role || null,
+  token: localStorage.getItem('token') || null,
   status: 'idle',
   error: null,
-}
+};
+
 
 export const checkAuth = createAsyncThunk(
   'auth/checkAuth',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/auth/authcheck`, {
-        withCredentials: true,
-      })
-
-      return response.data.user
+      const response = await api.get('/api/auth/authcheck');
+      return response.data.user;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Unauthorized')
+      return rejectWithValue(error.response?.data?.message || 'Unauthorized');
     }
   }
-)
+);
 
 export const registerUser = createAsyncThunk(
   'auth/registerUser',
   async (payload, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/register`, payload)
-      return response.data
+      const response = await api.post('/api/auth/register', payload);
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.messege || 'Registration failed')
+      return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }
   }
-)
+);
 
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
   async (payload, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/login`, payload, {
-        withCredentials: true,
-      })
-      return response.data
+      const response = await api.post('/api/auth/login', payload);
+      console.log(response);
+
+      return response.data;
+
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed')
+      return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
   }
-)
+);
 
 export const logoutUser = createAsyncThunk(
   'auth/logoutUser',
   async (_, { rejectWithValue }) => {
     try {
-      await axios.post(`${API_URL}/api/auth/logout`, {}, { withCredentials: true })
-      return true
+      // If backend has a logout endpoint, call it here.
+      // await api.post('/api/auth/logout');
+      return true;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Logout failed')
+      return rejectWithValue(error.response?.data?.message || 'Logout failed');
     }
   }
-)
+);
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
     clearAuthError(state) {
-      state.error = null
+      state.error = null;
     },
     clearAuthSession(state) {
-      state.user = null
-      state.status = 'idle'
-      state.error = null
-      localStorage.removeItem('carInventoryUser')
+      state.user = null;
+      state.role = null;
+      state.token = null;
+      state.status = 'idle';
+      state.error = null;
+      localStorage.removeItem('carInventoryUser');
+      localStorage.removeItem('token');
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(checkAuth.pending, (state) => {
-        state.status = 'loading'
-        state.error = null
+        state.status = 'loading';
+        state.error = null;
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        state.user = action.payload
-        state.error = null
-        localStorage.setItem('carInventoryUser', JSON.stringify(action.payload))
+
+        state.status = 'succeeded';
+        state.user = action.payload;
+        state.role = action.payload.role;
+        state.error = null;
+        localStorage.setItem('carInventoryUser', JSON.stringify(action.payload));
       })
       .addCase(checkAuth.rejected, (state, action) => {
-        state.status = 'failed'
-        state.user = null
-        state.error = action.payload
-        localStorage.removeItem('carInventoryUser')
+        state.status = 'failed';
+        state.user = null;
+        state.role = null;
+        state.token = null;
+        state.error = action.payload;
+        localStorage.removeItem('carInventoryUser');
+        localStorage.removeItem('token');
       })
       .addCase(registerUser.pending, (state) => {
-        state.status = 'loading'
-        state.error = null
+        state.status = 'loading';
+        state.error = null;
       })
       .addCase(registerUser.fulfilled, (state) => {
-        state.status = 'succeeded'
+        state.status = 'succeeded';
       })
       .addCase(registerUser.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.payload
+        state.status = 'failed';
+        state.error = action.payload;
       })
       .addCase(loginUser.pending, (state) => {
-        state.status = 'loading'
-        state.error = null
+        state.status = 'loading';
+        state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        state.user = action.payload.user
-        localStorage.setItem('carInventoryUser', JSON.stringify(action.payload.user))
+        state.status = 'succeeded';
+        state.user = action.payload.user;
+        state.role = action.payload.user.role;
+        state.token = action.payload.token;
+        localStorage.setItem('carInventoryUser', JSON.stringify(action.payload.user));
+        localStorage.setItem('token', action.payload.token);
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.payload
+        state.status = 'failed';
+        state.error = action.payload;
       })
       .addCase(logoutUser.fulfilled, (state) => {
-        state.status = 'idle'
-        state.user = null
-        localStorage.removeItem('carInventoryUser')
-      })
+        state.status = 'idle';
+        state.user = null;
+        state.role = null;
+        state.token = null;
+        localStorage.removeItem('carInventoryUser');
+        localStorage.removeItem('token');
+      });
   },
-})
+});
 
-export const { clearAuthError, clearAuthSession } = authSlice.actions
-export default authSlice.reducer
+export const { clearAuthError, clearAuthSession } = authSlice.actions;
+export default authSlice.reducer;

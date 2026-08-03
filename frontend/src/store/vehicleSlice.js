@@ -1,9 +1,6 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import axios from 'axios'
-import { clearAuthSession } from './authSlice.js'
-
-// const API_URL = 'http://localhost:3000'
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import api from '../api/axios';
+import { clearAuthSession } from './authSlice';
 
 const initialState = {
   list: [],
@@ -11,113 +8,99 @@ const initialState = {
   error: null,
   purchaseStatus: 'idle',
   adminStatus: 'idle',
-}
+};
 
 export const fetchVehicles = createAsyncThunk(
   'vehicles/fetchVehicles',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/admin/vehicles/getList`)
-      return response.data.data || []
+      const response = await api.get('/api/admin/vehicles/getList');
+      return response.data.data || response.data || [];
     } catch (error) {
-      return rejectWithValue(error.response?.data?.messege || 'Unable to fetch vehicles')
+      return rejectWithValue(error.response?.data?.message || 'Unable to fetch vehicles');
     }
   }
-)
+);
 
 export const purchaseVehicle = createAsyncThunk(
   'vehicles/purchaseVehicle',
   async (vehicleId, { rejectWithValue, dispatch }) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/api/user/vehicles/${vehicleId}/purchase`,
-        {},
-        { withCredentials: true }
-      )
-      await dispatch(fetchVehicles())
-      return response.data
+      const response = await api.post(`/api/user/vehicles/${vehicleId}/purchase`);
+      await dispatch(fetchVehicles());
+      return response.data;
     } catch (error) {
       if (error.response?.status === 401 || error.response?.status === 403) {
-        dispatch(clearAuthSession())
+        dispatch(clearAuthSession());
       }
-      return rejectWithValue(error.response?.data?.error || 'Purchase failed')
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Purchase failed');
     }
   }
-)
+);
 
 export const addVehicle = createAsyncThunk(
   'vehicles/addVehicle',
   async (payload, { rejectWithValue, dispatch }) => {
     try {
-      const response = await axios.post(`${API_URL}/api/admin/vehicles/add`, payload, {
-        withCredentials: true,
-      })
-      await dispatch(fetchVehicles())
-      return response.data
+      const response = await api.post('/api/admin/vehicles/add', payload);
+      await dispatch(fetchVehicles());
+      return response.data;
     } catch (error) {
       if (error.response?.status === 401 || error.response?.status === 403) {
-        dispatch(clearAuthSession())
+        dispatch(clearAuthSession());
       }
-      return rejectWithValue(error.response?.data?.messege || 'Unable to add vehicle')
+      return rejectWithValue(error.response?.data?.message || 'Unable to add vehicle');
     }
   }
-)
+);
 
 export const updateVehicle = createAsyncThunk(
   'vehicles/updateVehicle',
   async ({ id, data }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await axios.put(`${API_URL}/api/admin/vehicles/update/${id}`, data, {
-        withCredentials: true,
-      })
-      await dispatch(fetchVehicles())
-      return response.data
+      const response = await api.put(`/api/admin/vehicles/update/${id}`, data);
+      await dispatch(fetchVehicles());
+      return response.data;
     } catch (error) {
       if (error.response?.status === 401 || error.response?.status === 403) {
-        dispatch(clearAuthSession())
+        dispatch(clearAuthSession());
       }
-      return rejectWithValue(error.response?.data?.messege || 'Unable to update vehicle')
+      return rejectWithValue(error.response?.data?.message || 'Unable to update vehicle');
     }
   }
-)
+);
 
 export const deleteVehicle = createAsyncThunk(
   'vehicles/deleteVehicle',
   async (id, { rejectWithValue, dispatch }) => {
     try {
-      const response = await axios.delete(`${API_URL}/api/admin/vehicles/delete/${id}`, {
-        withCredentials: true,
-      })
-      await dispatch(fetchVehicles())
-      return response.data
+      const response = await api.delete(`/api/admin/vehicles/delete/${id}`);
+      await dispatch(fetchVehicles());
+      return response.data;
     } catch (error) {
       if (error.response?.status === 401 || error.response?.status === 403) {
-        dispatch(clearAuthSession())
+        dispatch(clearAuthSession());
       }
-      return rejectWithValue(error.response?.data?.messege || 'Unable to delete vehicle')
+      return rejectWithValue(error.response?.data?.message || 'Unable to delete vehicle');
     }
   }
-)
+);
 
 export const restockVehicle = createAsyncThunk(
   'vehicles/restockVehicle',
   async ({ id, amount }, { rejectWithValue, dispatch }) => {
     try {
-      const response = await axios.post(
-        `${API_URL}/api/admin/vehicles/restock/${id}`,
-        { amount },
-        { withCredentials: true }
-      )
-      await dispatch(fetchVehicles())
-      return response.data
+      const response = await api.post(`/api/admin/vehicles/restock/${id}`, { amount });
+      await dispatch(fetchVehicles());
+      return response.data;
     } catch (error) {
       if (error.response?.status === 401 || error.response?.status === 403) {
-        dispatch(clearAuthSession())
+        dispatch(clearAuthSession());
       }
-      return rejectWithValue(error.response?.data?.error || 'Unable to restock vehicle')
+      return rejectWithValue(error.response?.data?.error || error.response?.data?.message || 'Unable to restock vehicle');
     }
   }
-)
+);
 
 const vehicleSlice = createSlice({
   name: 'vehicles',
@@ -126,68 +109,68 @@ const vehicleSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchVehicles.pending, (state) => {
-        state.status = 'loading'
-        state.error = null
+        state.status = 'loading';
+        state.error = null;
       })
       .addCase(fetchVehicles.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        state.list = action.payload
+        state.status = 'succeeded';
+        state.list = action.payload;
       })
       .addCase(fetchVehicles.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.payload
+        state.status = 'failed';
+        state.error = action.payload;
       })
       .addCase(purchaseVehicle.pending, (state) => {
-        state.purchaseStatus = 'loading'
+        state.purchaseStatus = 'loading';
       })
       .addCase(purchaseVehicle.fulfilled, (state) => {
-        state.purchaseStatus = 'succeeded'
+        state.purchaseStatus = 'succeeded';
       })
       .addCase(purchaseVehicle.rejected, (state, action) => {
-        state.purchaseStatus = 'failed'
-        state.error = action.payload
+        state.purchaseStatus = 'failed';
+        state.error = action.payload;
       })
       .addCase(addVehicle.pending, (state) => {
-        state.adminStatus = 'loading'
+        state.adminStatus = 'loading';
       })
       .addCase(addVehicle.fulfilled, (state) => {
-        state.adminStatus = 'succeeded'
+        state.adminStatus = 'succeeded';
       })
       .addCase(addVehicle.rejected, (state, action) => {
-        state.adminStatus = 'failed'
-        state.error = action.payload
+        state.adminStatus = 'failed';
+        state.error = action.payload;
       })
       .addCase(updateVehicle.pending, (state) => {
-        state.adminStatus = 'loading'
+        state.adminStatus = 'loading';
       })
       .addCase(updateVehicle.fulfilled, (state) => {
-        state.adminStatus = 'succeeded'
+        state.adminStatus = 'succeeded';
       })
       .addCase(updateVehicle.rejected, (state, action) => {
-        state.adminStatus = 'failed'
-        state.error = action.payload
+        state.adminStatus = 'failed';
+        state.error = action.payload;
       })
       .addCase(deleteVehicle.pending, (state) => {
-        state.adminStatus = 'loading'
+        state.adminStatus = 'loading';
       })
       .addCase(deleteVehicle.fulfilled, (state) => {
-        state.adminStatus = 'succeeded'
+        state.adminStatus = 'succeeded';
       })
       .addCase(deleteVehicle.rejected, (state, action) => {
-        state.adminStatus = 'failed'
-        state.error = action.payload
+        state.adminStatus = 'failed';
+        state.error = action.payload;
       })
       .addCase(restockVehicle.pending, (state) => {
-        state.adminStatus = 'loading'
+        state.adminStatus = 'loading';
       })
       .addCase(restockVehicle.fulfilled, (state) => {
-        state.adminStatus = 'succeeded'
+        state.adminStatus = 'succeeded';
       })
       .addCase(restockVehicle.rejected, (state, action) => {
-        state.adminStatus = 'failed'
-        state.error = action.payload
-      })
+        state.adminStatus = 'failed';
+        state.error = action.payload;
+      });
   },
-})
+});
 
-export default vehicleSlice.reducer
+export default vehicleSlice.reducer;
