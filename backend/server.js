@@ -11,4 +11,4 @@ if (process.env.NODE_ENV !== 'production') {
   app.listen(3000, () => console.log('Local server running'));
 }
 
-// module.exports = app;
+export default app;
