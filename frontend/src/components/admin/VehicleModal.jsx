@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Input from '../ui/Input';
 import Button from '../ui/Button';
+import ImageUpload from '../ui/ImageUpload';
 
 const VehicleModal = ({ isOpen, onClose, vehicle, onSave, isSaving }) => {
   const [formData, setFormData] = useState({
@@ -37,6 +38,7 @@ const VehicleModal = ({ isOpen, onClose, vehicle, onSave, isSaving }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log(formData);
     onSave({
       ...formData,
       price: Number(formData.price),
@@ -67,7 +69,7 @@ const VehicleModal = ({ isOpen, onClose, vehicle, onSave, isSaving }) => {
             placeholder="e.g. Camry"
           />
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">
@@ -109,12 +111,12 @@ const VehicleModal = ({ isOpen, onClose, vehicle, onSave, isSaving }) => {
             placeholder="e.g. 5"
             disabled={!!vehicle} // Usually don't edit quantity directly if restocking is separate
           />
-          <Input
-            label="Image URL"
-            value={formData.imageUrl}
-            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-            placeholder="https://..."
-          />
+          <div className="col-span-2">
+            <ImageUpload
+              value={formData.imageUrl}
+              onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end space-x-3 pt-4 border-t border-slate-800">

@@ -2,10 +2,6 @@ import mongooes from 'mongoose'
 
 
 const VehicleSchema = new mongooes.Schema({
-    image: {
-        type:String,
-        required: [false, 'Vehicle make is not required']
-    },
     make: {
         type: String,
         required: [true, 'Vehicle make is required']
@@ -27,6 +23,10 @@ const VehicleSchema = new mongooes.Schema({
         type: Number,
         required: [true, 'Quantity in stock is required'],
         min: [0, 'Quantity cannot be less than zero']
+    },
+    imageUrl: {
+        type: String,
+        required: [false, 'Vehicle make is not required']
     }
 }, { timestamps: true })
 

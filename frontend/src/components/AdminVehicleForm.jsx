@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import ImageUpload from './ui/ImageUpload'
 
 const emptyForm = {
   image: '',
@@ -48,11 +49,15 @@ function AdminVehicleForm({ mode = 'add', initialValue, onSubmit, onCancel }) {
         )}
       </div>
 
+      <div className="mb-4">
+        <ImageUpload
+          variant="light"
+          value={form.image}
+          onChange={(url) => setForm((current) => ({ ...current, image: url }))}
+        />
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">Image URL</span>
-          <input name="image" value={form.image} onChange={handleChange} className="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="https://..." />
-        </label>
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-slate-700">Make</span>
           <input name="make" value={form.make} onChange={handleChange} className="w-full rounded-xl border border-slate-300 px-3 py-2" placeholder="Toyota" required />

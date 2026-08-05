@@ -24,7 +24,6 @@ export const handleImageUpload = async (req, res) => {
         })
 
     } catch (err) {
-        // console.log(err);
 
         res.json({
             success: false,
@@ -39,20 +38,20 @@ export const addvehicle = async (req, res) => {
 
     try {
         const {
-            image,
             make,
             model,
             category,
             price,
-            quantity } = req.body;
+            quantity,
+            imageUrl } = req.body;
 
         const newlyAddvehicle = new Vehicle({
-            image,
             make,
             model,
             category,
             price,
-            quantity
+            quantity,
+            imageUrl
         })
 
         await newlyAddvehicle.save()
@@ -102,12 +101,13 @@ export const updatevehicle = async (req, res) => {
         const { id } = req.params;
 
         const {
-            image,
             make,
             model,
             category,
             price,
-            quantity } = req.body;
+            quantity,
+            imageUrl,
+        } = req.body;
 
         const findvehicle = await Vehicle.findById(id);
 
@@ -118,7 +118,7 @@ export const updatevehicle = async (req, res) => {
             })
         }
 
-        findvehicle.image = image || findvehicle.image;
+        findvehicle.imageUrl = imageUrl || findvehicle.imageUrl;
         findvehicle.make = make || findvehicle.make;
         findvehicle.model = model || findvehicle.model;
         findvehicle.category = category || findvehicle.category;
