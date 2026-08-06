@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { PackageSearch, Shield, TrendingUp } from 'lucide-react'
 import VehicleCard from '../components/VehicleCard.jsx'
-import { purchaseVehicle } from '../store/vehicleSlice.js'
+import CheckoutModal from '../components/CheckoutModal.jsx'
 
 function HomePage() {
   const dispatch = useDispatch()
@@ -11,6 +11,8 @@ function HomePage() {
   const { user } = useSelector((state) => state.auth)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
+  const [selectedVehicle, setSelectedVehicle] = useState(null)
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
 
   const filteredVehicles = useMemo(() => {
     return list.filter((vehicle) => {
@@ -24,8 +26,13 @@ function HomePage() {
   const totalStock = list.reduce((sum, vehicle) => sum + Number(vehicle.quantity || 0), 0)
   const avgPrice = list.length ? Math.round(list.reduce((sum, vehicle) => sum + Number(vehicle.price || 0), 0) / list.length) : 0
 
-  const handlePurchase = async (vehicleId) => {
-    await dispatch(purchaseVehicle(vehicleId))
+  const handlePurchase = (vehicle) => {
+    if (!user) {
+        alert("Please login to purchase");
+        return;
+    }
+    setSelectedVehicle(vehicle);
+    setIsCheckoutOpen(true);
   }
 
   return (
@@ -104,6 +111,17 @@ function HomePage() {
           </div>
         </aside>
       </section>
+      
+      {selectedVehicle && (
+          <CheckoutModal
+              vehicle={selectedVehicle}
+              isOpen={isCheckoutOpen}
+              onClose={() => {
+                  setIsCheckoutOpen(false);
+                  setSelectedVehicle(null);
+              }}
+          />
+      )}
     </div>
   )
 }

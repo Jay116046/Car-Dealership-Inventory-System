@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
-import vehiclesReducer from './vehicleSlice'
 import authReducer from './authSlice'
+import vehiclesReducer from './vehicleSlice'
+import orderReducer from './orderSlice'
 
 export const store = configureStore({
   reducer: {
-    vehicles: vehiclesReducer,
     auth: authReducer,
+    vehicles: vehiclesReducer,
+    orders: orderReducer,
   },
 })
 

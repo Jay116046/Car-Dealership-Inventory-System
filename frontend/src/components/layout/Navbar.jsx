@@ -16,6 +16,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={18} /> },
+    { name: 'My Account', path: '/account', icon: <Car size={18} /> },
   ];
 
   if (role === 'admin') {

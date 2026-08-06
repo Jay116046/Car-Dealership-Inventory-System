@@ -1,24 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchVehicles, addVehicle, updateVehicle, deleteVehicle, restockVehicle } from '../store/vehicleSlice';
+import { getAllOrders, updateOrderStatus } from '../store/orderSlice';
 import Navbar from '../components/layout/Navbar';
 import VehicleTable from '../components/admin/VehicleTable';
 import VehicleModal from '../components/admin/VehicleModal';
 import RestockModal from '../components/admin/RestockModal';
+import AdminOrderTable from '../components/admin/AdminOrderTable';
 import Button from '../components/ui/Button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Car, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
-  const { list: vehicles, status, adminStatus } = useSelector((state) => state.vehicles);
-  
+  const { list: vehicles, status: vehicleStatus, adminStatus } = useSelector((state) => state.vehicles);
+  const { orders, loading: ordersLoading } = useSelector((state) => state.orders);
+
+  const [activeTab, setActiveTab] = useState('inventory'); // 'inventory' | 'orders'
   const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
 
   useEffect(() => {
     dispatch(fetchVehicles());
+    dispatch(getAllOrders());
   }, [dispatch]);
 
   const handleAddClick = () => {
@@ -80,32 +85,90 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUpdateOrderStatus = async (orderId, progressStatus) => {
+    const result = await dispatch(updateOrderStatus({ orderId, progressStatus }));
+    if (updateOrderStatus.fulfilled.match(result)) {
+      toast.success(`Order status changed to "${progressStatus}"`);
+    } else {
+      toast.error(result.payload || 'Failed to update order status');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200">
       <Navbar />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-white mb-2">Inventory Management</h1>
-            <p className="text-slate-400">Add, edit, restock, or delete vehicles from the system.</p>
+            <h1 className="text-3xl font-extrabold text-white mb-2">Admin Control Center</h1>
+            <p className="text-slate-400">Manage showroom inventory and customer orders seamlessly.</p>
           </div>
-          <Button onClick={handleAddClick} className="flex-shrink-0">
-            <PlusCircle size={18} className="mr-2" />
-            Add New Vehicle
-          </Button>
+          {activeTab === 'inventory' && (
+            <Button onClick={handleAddClick} className="flex-shrink-0">
+              <PlusCircle size={18} className="mr-2" />
+              Add New Vehicle
+            </Button>
+          )}
         </div>
 
-        {status === 'loading' && vehicles.length === 0 ? (
+        {/* Tab Navigation */}
+        <div className="flex space-x-2 border-b border-slate-800 mb-6">
+          <button
+            onClick={() => setActiveTab('inventory')}
+            className={`flex items-center space-x-2 pb-3 px-4 font-semibold text-sm transition-all border-b-2 ${
+              activeTab === 'inventory'
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Car size={18} />
+            <span>Vehicle Inventory</span>
+            <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-slate-800 text-slate-300">
+              {vehicles.length}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`flex items-center space-x-2 pb-3 px-4 font-semibold text-sm transition-all border-b-2 ${
+              activeTab === 'orders'
+                ? 'border-blue-500 text-blue-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <ShoppingBag size={18} />
+            <span>Customer Orders</span>
+            <span className="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-slate-800 text-slate-300">
+              {orders.length}
+            </span>
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'inventory' ? (
+          vehicleStatus === 'loading' && vehicles.length === 0 ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <VehicleTable
+              vehicles={vehicles}
+              onEdit={handleEditClick}
+              onRestock={handleRestockClick}
+              onDelete={handleDeleteClick}
+            />
+          )
+        ) : ordersLoading && orders.length === 0 ? (
           <div className="flex justify-center items-center py-20">
             <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : (
-          <VehicleTable 
-            vehicles={vehicles}
-            onEdit={handleEditClick}
-            onRestock={handleRestockClick}
-            onDelete={handleDeleteClick}
+          <AdminOrderTable
+            orders={orders}
+            onUpdateStatus={handleUpdateOrderStatus}
+            isUpdating={ordersLoading}
           />
         )}
 

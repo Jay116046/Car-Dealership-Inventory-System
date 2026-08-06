@@ -68,7 +68,7 @@ const VehicleCard = ({ vehicle, onPurchase, isPurchasing }) => {
           <Button
             variant="primary"
             disabled={isOutOfStock || isPurchasing}
-            onClick={() => onPurchase(vehicle._id || vehicle.id)}
+            onClick={() => onPurchase(vehicle)}
             className={`w-32 ${isOutOfStock ? 'bg-slate-700 hover:bg-slate-700 text-slate-400 cursor-not-allowed shadow-none' : ''}`}
             isLoading={isPurchasing}
           >

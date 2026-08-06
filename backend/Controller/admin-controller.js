@@ -12,9 +12,7 @@ export const handleImageUpload = async (req, res) => {
     }
 
     try {
-
         const result = await imageUploadUtil(req.file.buffer);
-
         // console.log(result);
 
         res.status(200).json({
@@ -24,7 +22,6 @@ export const handleImageUpload = async (req, res) => {
         })
 
     } catch (err) {
-
         res.json({
             success: false,
             message: "error"

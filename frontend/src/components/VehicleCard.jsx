@@ -36,7 +36,7 @@ function VehicleCard({ vehicle, onPurchase, isAdmin, onEdit, onDelete, onRestock
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            onClick={() => onPurchase(vehicle._id)}
+            onClick={() => onPurchase(vehicle)}
             disabled={quantity <= 0}
             className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
